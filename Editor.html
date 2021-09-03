@@ -1,0 +1,225 @@
+<html>
+<head>
+	<title>Animation Editor</title>
+	<style>
+	/* RESET */
+	html, body, #main, #mainMenu, ul
+	{
+		padding: 	0px 0px 0px 0px;
+		margin:		0px 0px 0px 0px;
+	}
+	
+	#mainMenu
+	{
+		background-color:	#BBBBBB;
+		vertical-align: baseline;
+		z-index:			10000000;
+	}
+	
+	ul.menuList
+	{
+		padding-top: 		10px;
+		padding-bottom:		10px;
+		padding-left:		0px;
+		margin:				0;
+		display:			inline-block;	
+		width:				150px;
+		text-align:			center;
+		background-color:	#CCCCCC;
+		cursor:				pointer;
+	}
+	
+	ul.subMenu
+	{
+		padding-top: 		10px;
+		padding-bottom:		10px;
+		padding-left:		0px;
+		margin:				0;
+		min-width:			150px;
+		text-align:			center;
+		background-color:	#CCCCCC;
+		cursor:				pointer;
+		display:			none;
+	}
+	
+	ul.menuList:hover
+	{
+		background-color:	#FFCCCC;
+	}
+	
+	.winFrame
+	{
+		border:				1px solid blue;
+		z-index:			9;
+	}
+	
+	.winTitleBar
+	{
+		background-color:	#777799;
+		z-index:			9;
+		cursor:				default;
+	}
+	
+	.winContent
+	{
+		border:				1px solid blue;
+		z-index:			9;
+	}
+	
+	.winControl
+	{
+		display:			inline-block;
+		float:				right;
+	}
+	
+	.winTitleLabel
+	{
+		display:			inline-block;
+	}
+	
+	.menuDropDown
+	{
+		position:			absolute;
+		top:				38px;
+		background-color:	#CCCCCC;
+		display:			none;
+		min-width:			150px;
+		z-index:			10000001;
+	}
+	
+	.menuButton
+	{
+		padding-top: 		10px;
+		padding-bottom:		10px;
+	}
+	
+	.menuButton:hover
+	{
+		background-color:	#DDDDDD;
+	}
+	
+	.layer
+	{
+		position:			fixed;
+	}
+	
+	.aniButton_Run
+	{
+		background: 		url(Graphics/Run.png);
+	}
+	
+	.aniButton_Halt
+	{
+		background: 		url(Graphics/Halt.png);
+	}
+	
+	.aniButton_StepF
+	{
+		background: 		url(Graphics/StepF.png);
+	}
+	</style>
+</head>
+<body>
+
+<!-- MENU -->
+<div id="mainMenu">
+	<ul id="mainMenuFile" class="menuList" onmouseenter="UI_toggleMenuVis(this, 1);" onmouseleave="UI_toggleMenuVis(this, 0);">File
+		<div class="menuDropDown">
+			<ul class="menuButton" onClick="window_NewAnimation()">New Animation</ul>
+			<ul class="menuButton">File</ul>
+		</div>
+	</ul>
+	
+	<ul id="mainMenuEdit" class="menuList" onmouseenter="UI_toggleMenuVis(this, 1);" onmouseleave="UI_toggleMenuVis(this, 0);">Edit
+		<div class="menuDropDown" id="mainMenuEditSub">
+			<ul class="menuButton" onClick="Edit_openEditWindow();">Open Edit Window</ul>
+			<ul class="menuButton" onClick="Edit_decompileNodes(editorWindow);">Decompile Nodes</ul>
+		</div>
+	</ul>
+	
+	<ul id="mainMenuWindow" class="menuList" onmouseenter="UI_toggleMenuVis(this, 1);" onmouseleave="UI_toggleMenuVis(this, 0);">Window
+		<div class="menuDropDown" id="mainMenuWindowSub">
+			<ul class="menuButton" onClick="openAnimationEditor();">Animation Editor</ul>
+		</div>
+	</ul>
+</div>
+<div id="main">
+asd
+</div>
+
+
+
+</body>
+</html>
+
+<script src="processor.js"></script>
+<script src="animation.js"></script>
+<script src="windows.js"></script>
+<script src="edit.js"></script>
+<script src="Divs/EditorToolbox.js"></script>
+
+<!--<script src="Starfield.js"></script>-->
+<script src="AniPixels.js"></script>
+
+<script>
+
+let Dimensions = [0,0];
+
+
+function UI_toggleMenuVis(item, sw)
+{
+	if (sw){item.childNodes[1].style.display = "block";}
+	else{item.childNodes[1].style.display = "none";}
+}
+
+
+function window_NewAnimation()
+{
+	let win = new Win('New Animation', 303, 511, 482, 117);
+	
+	win.addLabel('New Animation', 30, 60, 200, 25, null)
+	let EDITOR_T_TXT_10 = win.addTextbox(30, 90, 100, 25, null)
+	let EDITOR_T_TXT_11 = win.addTextbox(30, 120, 100, 25, null);
+	let EDITOR_T_TXT_12 = win.addTextbox(30, 150, 100, 25, null)
+	win.addButton('Create New Animation', 30, 180, 100, 50, function(){createNewAnimation(EDITOR_T_TXT_11.value, EDITOR_T_TXT_12.value, EDITOR_T_TXT_10.value); this.win.destroy(); } )
+	win.addLabel('Fps', 140, 90, 75, 25, null)
+	win.addLabel('Width', 140, 120, 75, 25, null)
+	win.addLabel('Height', 140, 150, 75, 25, null)
+}
+
+
+function openAnimationEditor()
+{
+	if (animEdit.winPointer.style.visibility == "visible"){animEdit.hide();}
+	else
+	{
+		animEdit.show();
+	}
+}
+
+//Additional menu items
+let mainManuFile = document.getElementById("mainMenuFile");
+let mainManuEdit = document.getElementById("mainMenuEdit");
+
+//Animation Editor
+let animEdit = new Win('Animation Editor', 1135, 530, 300, 129, [0, 0, 0], false);
+	let ANIM_WINDOW_LAYER_SELECT 	= animEdit.addSelect(930, 70, 200, 400, true, []);
+	let ANIM_EDITOR_LBL_ETIME		= animEdit.addLabel('Elapsed Time', 10, 40, 125, 25, null);
+	let ANIM_EDITOR_LBL_FRAMEC		= animEdit.addLabel('0', 120, 40, 100, 25, null);
+	let ANIM_EDITOR_LBL_LAYERS		= animEdit.addLabel('Layers', 930, 40, 100, 25, null);
+	let ANIM_EDITOR_BTN_RUN			= animEdit.addButton('', 0, 480, 50, 50, animation_Run);
+		ANIM_EDITOR_BTN_RUN.classList.add("aniButton_Run");
+	let ANIM_EDITOR_BTN_STEPF		= animEdit.addButton('', 50, 480, 50, 50, animation_StepForward);
+		ANIM_EDITOR_BTN_STEPF.classList.add("aniButton_StepF");
+
+
+Edit_copyToEditor(animEdit);
+//animEdit.hide();
+
+
+
+
+
+
+</script>
+<script src="autoexec.js"></script>
